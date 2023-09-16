@@ -14,7 +14,7 @@ impl Parser {
     pub fn parse(input_buffer: &InputBuffer) {
         match &input_buffer.buffer {
             Some(buffer) => {
-                if buffer[0] == '.' {
+                if buffer.chars().next() == Some('.') {
                     Parser::parse_meta_command();
                 } else {
                     Parser::parse_statement();
