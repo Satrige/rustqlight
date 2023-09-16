@@ -1,4 +1,4 @@
-use super::input_buffer::InputBuffer;
+use crate::common::types::input_buffer::InputBuffer;
 
 pub struct Parser {}
 
