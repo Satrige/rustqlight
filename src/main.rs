@@ -1,5 +1,5 @@
 mod repl;
 
 fn main() {
-    repl::run();
+    repl::process::run();
 }

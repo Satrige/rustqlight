@@ -1,5 +1,5 @@
-use std::io::{self, Write};
-use crate::repl::input_buffer::InputBuffer;
+use std::io::{ self, Write };
+use super::input_buffer::InputBuffer;
 
 pub fn print_prompt() {
     print!("db > ");

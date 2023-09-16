@@ -1,8 +1,5 @@
-mod prompt;
-mod parser;
-mod input_buffer;
-
-use parser::Parser;
+use super::prompt;
+use super::parser::Parser;
 
 pub fn run() {
     loop {
