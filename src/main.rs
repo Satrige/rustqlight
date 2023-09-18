@@ -1,6 +1,5 @@
-mod repl;
-mod common;
+mod core;
 
 fn main() {
-    repl::process::run();
+    core::process::run();
 }
