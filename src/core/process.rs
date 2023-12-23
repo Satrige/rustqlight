@@ -1,4 +1,4 @@
-use super::parser::commandParser::parse_with_prompt;
+use super::{parser::commandParser::parse_with_prompt, types::parsed_statement};
 
 pub fn initialize() {
     println!("The db was initialized");
@@ -6,13 +6,13 @@ pub fn initialize() {
 
 pub fn run() {
     loop {
-        parse_with_prompt();
+        match parse_with_prompt() {
+            Some(parsed_statement) => {
 
-        // match parser::parse(&input_buffer) {
-        //     Some(boxed_statement) => {
-        //         println!("Right way: {:?}", (*boxed_statement).get_statement_type());
-        //     },
-        //     None => println!("Do nothing"),
-        // }
+            },
+            None => {
+                println!("Unrecognized statement");
+            }
+        }
     }
 }
