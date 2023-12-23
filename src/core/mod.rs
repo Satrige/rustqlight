@@ -1,7 +1,8 @@
+mod enums;
+mod types;
+mod traits;
+
 mod parser;
-mod prompt;
-mod input_buffer;
-mod meta_commands;
-mod statements;
+mod implementations;
 
 pub mod process;
