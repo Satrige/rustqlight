@@ -4,6 +4,7 @@ pub enum StatementType {
     StatementSelect,
 }
 
+#[derive(PartialEq)]
 pub enum Statements {
     Statement,
     MetaCommand,
