@@ -1,15 +1,15 @@
 use crate::core::{
-    traits::statement_trait::Statement,
-    enums::StatementType,
-    types::statements::InsertStatement,
+    types::{
+        statement::Statement,
+    },
 };
 
-pub fn execute(boxed_statement: &Box<dyn Statement>) {
-    match boxed_statement.get_statement_type() {
-        StatementType::StatementInsert => {
+pub fn execute(boxed_statement: &Box<Statement>) {
+    match &**boxed_statement {
+        Statement::Insert(insert_statement) => {
             println!("Statement Insert was not implemented yet");
         },
-        StatementType::StatementSelect => {
+        Statement::Select(select_statement) => {
             println!("Statement Select was not implemented yet");
         },
     }

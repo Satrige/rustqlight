@@ -1,4 +1,4 @@
-use crate::core::types::statements::SelectStatement;
+use crate::core::types::statement_types::SelectStatement;
 
 impl SelectStatement {
     pub fn new(words: &Vec<&str>) -> Self {
