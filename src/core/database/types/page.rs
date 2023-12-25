@@ -1,4 +1,4 @@
 pub struct Page {
-    num_rows: usize,
-    destination: Vec<u8>,
+    pub num_rows: usize,
+    pub destination: Vec<u8>,
 }
