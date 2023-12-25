@@ -1,8 +1,7 @@
 mod enums;
-mod types;
+pub mod types;
 
 mod parser;
 mod implementations;
 
-pub mod process;
-pub mod database;
+mod database;

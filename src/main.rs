@@ -1,7 +1,7 @@
 mod core;
 
 fn main() {
-    core::process::initialize();
+    let mut process = core::types::process::Process::new();
 
-    core::process::run();
+    process.run();
 }
