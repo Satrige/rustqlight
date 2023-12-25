@@ -1,3 +1,4 @@
+mod statements;
 mod meta_commands;
 
 mod types;
