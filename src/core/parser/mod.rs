@@ -1,3 +1,3 @@
 mod prompt;
 
-pub mod commandParser;
+pub mod command_parser;

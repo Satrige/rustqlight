@@ -11,18 +11,18 @@ use crate::core::{
 };
 
 impl ParsedStatement {
-    fn prepare_statement(statement_str: &String) -> Option<Box<Statement>> {
+    fn prepare_statement(statement_str: &String) -> Option<Statement> {
         let words: Vec<&str> = statement_str.split_whitespace().collect();
         let words_count = words.len();
 
         if words_count >= 3 && words[0].to_string() == "insert" {
             let insert_statement = InsertStatement::new(&words);
-            return Some(Box::new(Statement::Insert(insert_statement)));
+            return Some(Statement::Insert(insert_statement));
         }
 
         if words_count >= 3 && words[0].to_string() == "select" {
             let select_statement = SelectStatement::new(&words);
-            return Some(Box::new(Statement::Select(select_statement)));
+            return Some(Statement::Select(select_statement));
         }
 
         return None;
@@ -33,7 +33,7 @@ impl ParsedStatement {
             return ParsedStatement {
                 statement_type: Statements::MetaCommand,
                 statement: None,
-                meta_command: Some(Box::new((**buffer).clone())),
+                meta_command: Some((**buffer).clone()),
             }
         } else {
             return ParsedStatement {

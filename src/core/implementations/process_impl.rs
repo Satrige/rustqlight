@@ -1,7 +1,7 @@
 use crate::core::{
     types::process::Process,
     database::types::table::Table,
-    parser::commandParser::parse_with_prompt,
+    parser::command_parser::parse_with_prompt,
 };
 
 impl Process {
@@ -15,7 +15,7 @@ impl Process {
         loop {
             match parse_with_prompt() {
                 Some(parsed_statement) => {
-                    self.table.execute(&parsed_statement);
+                    self.table.execute(parsed_statement);
                 },
                 None => {
                     println!("Unrecognized statement");

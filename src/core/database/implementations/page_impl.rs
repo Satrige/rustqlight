@@ -25,7 +25,7 @@ impl Page {
         return result;
     }
 
-    pub fn insert_row(&mut self, row: &Row) -> Result<usize, &'static str>{
+    pub fn insert_row(&mut self, row: &Row) -> Result<usize, &'static str> {
         self.destination.extend(
             row.id.to_be_bytes(),
         );

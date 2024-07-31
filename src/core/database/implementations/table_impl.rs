@@ -66,10 +66,10 @@ impl Table {
         }
     }
 
-    fn execute_meta_command(&self, parsed_meta_command: &Option<Box<String>>) {
+    fn execute_meta_command(&self, parsed_meta_command: &Option<String>) {
         let meta_command = parsed_meta_command.as_ref().unwrap();
 
-        match (&**meta_command).as_str() {
+        match (&meta_command).as_str() {
             ".exit" => {
                 process::exit(0);
             },
@@ -79,10 +79,10 @@ impl Table {
         }
     }
 
-    pub fn execute(&mut self, parsed_statement: &ParsedStatement) {
+    pub fn execute(&mut self, parsed_statement: ParsedStatement) {
         match parsed_statement.statement_type {
             Statements::Statement => {
-                self.execute_statement(&*(parsed_statement.statement.as_ref().unwrap()));
+                self.execute_statement(parsed_statement.statement.as_ref().unwrap());
             },
             Statements::MetaCommand => {
                 self.execute_meta_command(&parsed_statement.meta_command);
