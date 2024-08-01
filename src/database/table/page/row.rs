@@ -1,8 +1,11 @@
-use crate::core::database::types::row::{
-    Row,
-    COLUMN_EMAIL_SIZE,
-    COLUMN_USERNAME_SIZE,
-};
+pub const COLUMN_EMAIL_SIZE: usize = 256;
+pub const COLUMN_USERNAME_SIZE: usize = 32;
+
+pub struct Row {
+    pub id: u32,
+    pub email: String,
+    pub user_name: String,
+}
 
 impl Row {
     pub fn new(
@@ -20,7 +23,7 @@ impl Row {
 
         Ok(
             Row {
-                id: id,
+                id,
                 email: email.clone(),
                 user_name: user_name.clone(),
             }

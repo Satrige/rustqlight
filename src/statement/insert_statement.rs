@@ -1,4 +1,7 @@
-use crate::core::types::statement_types::InsertStatement;
+pub struct InsertStatement {
+    pub email: String,
+    pub user_name: String,
+}
 
 impl InsertStatement {
     pub fn new(words: &Vec<&str>) -> Self {

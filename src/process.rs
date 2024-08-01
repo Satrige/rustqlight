@@ -1,19 +1,20 @@
-use crate::core::{
-    types::process::Process,
-    database::types::table::Table,
-    parser::command_parser::parse_with_prompt,
-};
+use crate::parser;
+use crate::database;
+
+pub struct Process {
+    table: Box<database::table::Table>,
+}
 
 impl Process {
     pub fn new() -> Self {
         Process {
-            table: Box::new(Table::new()),
+            table: Box::new(database::table::Table::new()),
         }
     }
 
     pub fn run(&mut self) {
         loop {
-            match parse_with_prompt() {
+            match parser::parse_with_prompt() {
                 Some(parsed_statement) => {
                     self.table.execute(parsed_statement);
                 },

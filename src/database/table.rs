@@ -1,23 +1,22 @@
-use std::process;
+mod page;
 
-use crate::core::{
-    enums::Statements,
-    database::types::{
-        row::Row,
-        page::{
-            Page,
-            PAGE_SIZE,
-        },
-        table::{
-            Table,
-            TABLE_MAX_PAGES,
-        },
-    },
-    types::{
-        statement::Statement,
-        parsed_statement::ParsedStatement,
-    },
+use std::process;
+use page::{
+    Page,
+    PAGE_SIZE,
+    row::Row,
 };
+use crate::statement::Statement;
+use crate::enums::Statements;
+use crate::parser::ParsedStatement;
+
+const TABLE_MAX_PAGES: usize = 100;
+
+pub struct Table {
+    pub num_rows: usize,
+    pub pages: Vec<Page>,
+    pub max_num_rows: usize,
+}
 
 impl Table {
     pub fn new() -> Self {
@@ -30,6 +29,7 @@ impl Table {
 
     fn get_new_id(&self) -> Result<usize, &'static str> {
         let result = self.num_rows + 1;
+
         if self.num_rows + 1 < self.max_num_rows {
             Ok(result)
         } else {
@@ -38,12 +38,13 @@ impl Table {
     }
 
     fn insert_new_row(&mut self, new_row: &Row) {
+        // Update it in advance
         if self.num_rows % PAGE_SIZE == 0 {
             self.pages.push(Page::new());
         }
 
         let last_page: &mut Page = self.pages.last_mut().unwrap();
-        
+
         last_page.insert_row(&new_row);
     }
 
