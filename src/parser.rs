@@ -15,32 +15,32 @@ pub struct ParsedStatement {
 }
 
 impl ParsedStatement {
-    fn prepare_statement(statement_str: &String) -> Option<Statement> {
+    fn prepare_statement(statement_str: &str) -> Option<Statement> {
         let words: Vec<&str> = statement_str.split_whitespace().collect();
         let words_count = words.len();
 
-        if words_count >= 3 && words[0].to_string() == "insert" {
+        if words_count >= 3 && words[0] == "insert" {
             let insert_statement = InsertStatement::new(&words);
             return Some(Statement::Insert(insert_statement));
         }
 
-        if words_count >= 3 && words[0].to_string() == "select" {
+        if words_count >= 3 && words[0] == "select" {
             let select_statement = SelectStatement::new(&words);
             return Some(Statement::Select(select_statement));
         }
 
-        return None;
+        None
     }
 
     pub fn new(buffer: &Box<String>) -> Self {
-        if buffer.chars().next() == Some('.') {
-            return ParsedStatement {
+        if buffer.starts_with('.') {
+            ParsedStatement {
                 statement_type: Statements::MetaCommand,
                 statement: None,
                 meta_command: Some((**buffer).clone()),
             }
         } else {
-            return ParsedStatement {
+            ParsedStatement {
                 statement_type: Statements::Statement,
                 statement: ParsedStatement::prepare_statement(buffer),
                 meta_command: None,
@@ -50,8 +50,7 @@ impl ParsedStatement {
 }
 
 struct InputBuffer {
-    pub input_length: usize,
-    pub buffer: Option<Box<String>>,
+    buffer: Option<Box<String>>,
 }
 
 fn print_prompt() {
@@ -69,7 +68,6 @@ fn read_input() -> InputBuffer {
     input = input.trim().to_string();
 
     InputBuffer {
-        input_length: input.len(),
         buffer: Some(Box::new(input)),
     }
 }
@@ -83,7 +81,7 @@ fn get_input() -> InputBuffer {
 pub fn parse_with_prompt() -> Option<ParsedStatement> {
     let input_buffer = get_input();
 
-    return match &input_buffer.buffer {
+    match &input_buffer.buffer {
         Some(buffer) => {
             let parsed_statement = ParsedStatement::new(buffer);
 
@@ -105,6 +103,6 @@ pub fn parse_with_prompt() -> Option<ParsedStatement> {
 
             None
         }
-    };
+    }
 }
 

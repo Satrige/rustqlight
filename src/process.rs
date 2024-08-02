@@ -16,7 +16,7 @@ impl Process {
         loop {
             match parser::parse_with_prompt() {
                 Some(parsed_statement) => {
-                    self.table.execute(parsed_statement);
+                    let _ = self.table.execute(parsed_statement);
                 },
                 None => {
                     println!("Unrecognized statement");
