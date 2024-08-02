@@ -1,11 +1,13 @@
-use crate::core::database::types::{
-    row::{
-        Row,
-        COLUMN_EMAIL_SIZE,
-        COLUMN_USERNAME_SIZE,
-    },
-    page::Page,
-};
+pub mod row;
+
+use row::{Row, COLUMN_EMAIL_SIZE, COLUMN_USERNAME_SIZE};
+
+pub const PAGE_SIZE: usize = 4096;
+
+pub struct Page {
+    pub num_rows: usize,
+    pub destination: Vec<u8>,
+}
 
 impl Page {
     pub fn new() -> Self {

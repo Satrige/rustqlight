@@ -1,7 +1,13 @@
-mod core;
+mod process;
+mod parser;
+mod enums;
+mod database;
+mod statement;
+
+use process::Process;
 
 fn main() {
-    let mut process = core::types::process::Process::new();
+    let mut process = Process::new();
 
     process.run();
 }
