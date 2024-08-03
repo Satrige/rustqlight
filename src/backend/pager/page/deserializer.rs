@@ -1,11 +1,11 @@
 pub trait Deserializer<T> {
-    fn deserialize(data: &Vec<u8>, offset: usize, length: usize) -> T;
+    fn deserialize(data: &[u8], offset: usize, length: usize) -> T;
 }
 
 pub struct U32Deserializer;
 
 impl Deserializer<u32> for U32Deserializer {
-    fn deserialize(data: &Vec<u8>, offset: usize, length: usize) -> u32 {
+    fn deserialize(data: &[u8], offset: usize, length: usize) -> u32 {
         if offset + length <= data.len() {
             let bytes = &data[offset..offset + length];
 
@@ -19,7 +19,7 @@ impl Deserializer<u32> for U32Deserializer {
 pub struct UTF8Deserializer;
 
 impl Deserializer<String> for UTF8Deserializer {
-    fn deserialize(data: &Vec<u8>, offset: usize, length: usize) -> String {
+    fn deserialize(data: &[u8], offset: usize, length: usize) -> String {
         if offset + length <= data.len() {
             let bytes = &data[offset..offset + length];
 

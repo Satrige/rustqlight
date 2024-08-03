@@ -1,6 +1,6 @@
-use std::mem;
+use std::io;
 
-pub const COLUMN_ID_SIZE: usize = mem::size_of::<u32>();
+pub const COLUMN_ID_SIZE: usize = size_of::<u32>();
 pub const COLUMN_EMAIL_SIZE: usize = 256;
 pub const COLUMN_USERNAME_SIZE: usize = 32;
 
@@ -15,13 +15,19 @@ impl RowData {
         id: u32,
         email: &String,
         user_name: &String,
-    ) -> Result<RowData, &'static str> {
+    ) -> io::Result<RowData> {
         if email.len() > COLUMN_EMAIL_SIZE {
-            return Err("The user's mail is too long");
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "The user's mail is too long",
+            ));
         }
 
         if user_name.len() > COLUMN_USERNAME_SIZE {
-            return Err("The username is too long");
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "The username is too long",
+            ));
         }
 
         Ok(
