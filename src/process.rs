@@ -1,14 +1,14 @@
 use crate::parser;
-use crate::database;
+use crate::backend::{ db_open, Table };
 
 pub struct Process {
-    table: Box<database::table::Table>,
+    table: Table,
 }
 
 impl Process {
     pub fn new() -> Self {
         Process {
-            table: Box::new(database::table::Table::new()),
+            table: db_open(None), // TODO rewrite, using command line db path
         }
     }
 

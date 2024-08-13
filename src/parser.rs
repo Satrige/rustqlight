@@ -87,12 +87,8 @@ pub fn parse_with_prompt() -> Option<ParsedStatement> {
 
             if parsed_statement.statement_type == Statements::Statement {
                 match &parsed_statement.statement {
-                    Some(_) => {
-                        Some(parsed_statement)
-                    },
-                    None => {
-                        None
-                    },
+                    Some(_) => Some(parsed_statement),
+                    None => None,
                 }
             } else {
                 Some(parsed_statement)
