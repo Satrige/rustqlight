@@ -1,5 +1,6 @@
 mod table;
 mod pager;
+mod cursor;
 
 use crate::backend::pager::Pager;
 pub use crate::backend::table::Table;

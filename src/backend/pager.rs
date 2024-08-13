@@ -11,6 +11,7 @@ pub struct Pager {
     file_name: String,
     file: Option<File>,
     pages: Vec<Page>,
+    total_num_rows: usize,
 }
 
 impl Pager {
@@ -21,6 +22,7 @@ impl Pager {
                 file: None,
                 file_name: file_name.to_string(),
                 pages: Vec::new(),
+                total_num_rows: 0,
             };
         }
 
@@ -29,10 +31,15 @@ impl Pager {
                 let saved_data = Self::read_file(&mut file);
 
                 if let Ok(pages) = saved_data {
+                    let total_num_rows = pages
+                        .iter()
+                        .fold(0, | acc, page | acc + page.get_num_rows());
+
                     Pager {
                         file: Some(file),
                         file_name: file_name.to_string(),
                         pages,
+                        total_num_rows,
                     }
                 } else {
                     println!("Unable to read file metadata {}", file_name);
@@ -81,8 +88,6 @@ impl Pager {
     }
 
     /// The method inserts new row to the last page
-    /// If the page isn't inside the `self.pages` it tries to get it from file
-    /// Otherwise it creates a new page.
     pub fn insert_new_row(&mut self, new_row_data: &RowData) -> io::Result<usize> {
         let cur_page = match self.pages.last_mut() {
             Some(last_page) => if last_page.get_num_rows() % PAGE_SIZE == 0 { // The last page is full
@@ -100,7 +105,11 @@ impl Pager {
             }
         };
 
-        cur_page.insert_row(new_row_data)
+        cur_page.insert_row(new_row_data)?;
+
+        self.total_num_rows += 1;
+
+        Ok(self.total_num_rows)
     }
 
     pub fn select_all(&self) {
@@ -128,5 +137,9 @@ impl Pager {
         rename(&tmp_file_name, &self.file_name)?;
 
         Ok(())
+    }
+
+    pub fn get_total_num_rows(&self) -> usize {
+        self.total_num_rows
     }
 }
