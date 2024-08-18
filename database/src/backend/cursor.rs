@@ -3,7 +3,8 @@ use super::pager::Pager;
 
 pub struct Cursor<'pager_lifetime> {
     pager: &'pager_lifetime Pager,
-    row_num: usize,
+    page_num: usize,
+    cell_num: usize,
     end_of_table: bool,
 }
 

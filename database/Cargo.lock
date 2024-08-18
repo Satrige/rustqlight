@@ -3,9 +3,5 @@
 version = 3
 
 [[package]]
-name = "b_tree"
-version = "0.1.0"
-
-[[package]]
-name = "database"
+name = "sqlLight"
 version = "0.1.0"
