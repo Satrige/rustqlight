@@ -47,7 +47,7 @@ impl Table {
                     &insert_statement.user_name,
                 )?;
 
-                self.pager.insert_new_row(&new_row)
+                self.insert_new_row(&new_row)
             },
             Statement::Select(_select_statement) => {
                 self.select()
