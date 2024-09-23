@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::io;
 use std::rc::Rc;
 
 enum TreeNode<T> {
@@ -33,17 +34,19 @@ struct LeafNode<T> {
 }
 
 impl<T: Ord + Copy> LeafNode<T> {
-    pub fn new(degree: usize) -> Self {
-        if degree == 0 {
-            panic!("Wrong value for the tree degree!")
-        }
-
-        LeafNode {
+    pub fn new(degree: usize, values: Option<Vec<T>>) -> Self {
+        let mut new_node = LeafNode {
             degree,
             values: vec![],
             left_node: None,
             right_node: None,
-        }
+        };
+
+        if let Some(values) = values {
+            new_node.values.extend(values);
+        };
+
+        new_node
     }
 
     fn split(&mut self) -> (T, Rc<RefCell<TreeNode<T>>>, Rc<RefCell<TreeNode<T>>>) {
@@ -52,15 +55,14 @@ impl<T: Ord + Copy> LeafNode<T> {
         let median_idx = cur_num_values / 2;
         let median_val = self.values[median_idx];
 
-        let mut new_left_node = LeafNode::new(self.degree);
-        let mut new_right_node = LeafNode::new(self.degree);
-
-        new_left_node
-            .values
-            .extend(self.values[0..median_idx].iter().copied());
-        new_right_node
-            .values
-            .extend(self.values[median_idx..self.values.len()].iter().copied());
+        let new_left_node = LeafNode::new(
+            self.degree,
+            Some(self.values.iter().take(median_idx).copied().collect()),
+        );
+        let new_right_node = LeafNode::new(
+            self.degree,
+            Some(self.values.iter().skip(median_idx).copied().collect()),
+        );
 
         let new_left_ref = Rc::new(RefCell::new(TreeNode::Leaf(new_left_node)));
         let new_right_ref = Rc::new(RefCell::new(TreeNode::Leaf(new_right_node)));
@@ -161,39 +163,31 @@ impl<T: Ord + Copy> CommonNode<T> {
     }
 
     fn split(&mut self) -> (T, Rc<RefCell<TreeNode<T>>>, Rc<RefCell<TreeNode<T>>>) {
-        let cur_num_values = self.values.len();
-
-        let median_idx = cur_num_values / 2;
+        let median_idx = self.values.len() / 2;
         let median_val = self.values[median_idx];
 
-        let mut left_node = CommonNode::new(self.degree, None, None);
-        let mut right_node = CommonNode::new(self.degree, None, None);
-
-        left_node
-            .values
-            .extend(self.values[0..median_idx].iter().copied());
-        right_node.values.extend(
-            self.values[median_idx + 1..self.values.len()]
-                .iter()
-                .copied(),
+        let left_node = CommonNode::new(
+            self.degree,
+            Some(self.values.iter().take(median_idx).copied().collect()), // [0, median_idx - 1]
+            Some(
+                self.childs
+                    .iter()
+                    .take(median_idx + 1)
+                    .map(Rc::clone)
+                    .collect(),
+            ), // [0, median_idx]
         );
-
-        // TODO Need to rewrite and use the median values
-        // Check wich values will be the left and right after the adding of the new one (median_val)
-        for child in self.childs.iter() {
-            let borrowed_child = child.borrow();
-            let values = match *borrowed_child {
-                TreeNode::Common(ref common_node) => &common_node.values,
-                TreeNode::Leaf(ref leaf_node) => &leaf_node.values,
-            };
-            // TODO check if we really need to check every time this val.
-            // Maybe just median_idx is enough
-            if *values.last().unwrap() < median_val {
-                left_node.childs.push(Rc::clone(&child));
-            } else {
-                right_node.childs.push(Rc::clone(&child));
-            }
-        }
+        let right_node = CommonNode::new(
+            self.degree,
+            Some(self.values.iter().skip(median_idx + 1).copied().collect()), // [median_idx + 1, n]
+            Some(
+                self.childs
+                    .iter()
+                    .skip(median_idx + 1)
+                    .map(Rc::clone)
+                    .collect(),
+            ), // [median_idx + 1, m]
+        );
 
         (
             median_val,
@@ -203,12 +197,10 @@ impl<T: Ord + Copy> CommonNode<T> {
     }
 
     fn insert(&mut self, new_value: &T) -> InsertType<T> {
-        // TODO Rewrite, using binary search
         let child_idx = self
             .values
-            .iter()
-            .position(|&value| value >= *new_value)
-            .unwrap_or_else(|| self.values.len());
+            .binary_search(new_value)
+            .unwrap_or_else(|idx| idx);
 
         let insert_result = match *self.childs[child_idx].borrow_mut() {
             TreeNode::Common(ref mut borrowed_common_child) => {
@@ -266,16 +258,26 @@ pub struct BTree<T> {
 }
 
 impl<T: Ord + Copy> BTree<T> {
-    pub fn new(leaf_degree: usize, common_degree: usize) -> Self {
-        if leaf_degree == 0 || common_degree == 0 {
-            panic!("Wrong values for the tree degrees!");
+    pub fn new(leaf_degree: usize, common_degree: usize) -> io::Result<Self> {
+        if leaf_degree == 0 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "The leaf node degree could not be equal to 0",
+            ));
         }
 
-        BTree {
+        if common_degree <= 1 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "The common node degree should be greater than 1",
+            ));
+        }
+
+        Ok(BTree {
             leaf_degree,
             common_degree,
-            root: TreeNode::Leaf(LeafNode::new(leaf_degree)),
-        }
+            root: TreeNode::Leaf(LeafNode::new(leaf_degree, None)),
+        })
     }
 
     pub fn insert(&mut self, new_value: &T) {
@@ -297,31 +299,6 @@ impl<T: Ord + Copy> BTree<T> {
         }
     }
 
-    fn binary_search(data: &Vec<T>, value: &T) -> usize {
-        if data.len() == 0 {
-            return 0;
-        }
-
-        let mut lo: usize = 0;
-        let mut hi: usize = data.len();
-
-        while lo < hi {
-            let mid_idx = lo + (hi - lo) / 2;
-            let mid_val = &data[mid_idx];
-
-            if *mid_val < *value {
-                lo = mid_idx + 1;
-            } else if *mid_val > *value {
-                hi = mid_idx;
-            } else {
-                lo = mid_idx;
-                break;
-            }
-        }
-
-        lo
-    }
-
     fn find_value(&self, node: &TreeNode<T>, value: &T) -> Option<T> {
         let values = match node {
             TreeNode::Common(common_node) => &common_node.values,
@@ -332,18 +309,18 @@ impl<T: Ord + Copy> BTree<T> {
             return None;
         }
 
-        let idx = Self::binary_search(values, value);
-
-        if idx < values.len() && values[idx] == *value {
-            return Some(*value);
+        match values.binary_search(value) {
+            Ok(idx) => match node {
+                TreeNode::Common(ref common_node) =>
+                    self.find_value(&*common_node.childs[idx + 1].borrow(), value),
+                TreeNode::Leaf(_) => Some(*value),
+            },
+            Err(idx) => match node {
+                TreeNode::Common(ref common_node) =>
+                    self.find_value(&*common_node.childs[idx].borrow(), value),
+                TreeNode::Leaf(_) => None,
+            },
         }
-
-        return if let TreeNode::Common(ref common_node) = node {
-            // TODO Check if it's fine to use &*
-            self.find_value(&*common_node.childs[idx].borrow(), value)
-        } else {
-            None
-        };
     }
 
     pub fn search(&self, value: &T) -> Option<T> {
@@ -365,7 +342,7 @@ mod tests {
 
         #[test]
         fn it_should_create_new_tree() {
-            let b_tree: BTree<i32> = BTree::new(2, 3);
+            let b_tree: BTree<i32> = BTree::new(2, 3).unwrap();
 
             assert_eq!(b_tree.leaf_degree, 2);
             assert_eq!(b_tree.common_degree, 3);
@@ -385,14 +362,14 @@ mod tests {
 
         #[test]
         fn it_should_search_in_empty_tree() {
-            let b_tree: BTree<i32> = BTree::new(2, 3);
+            let b_tree: BTree<i32> = BTree::new(2, 3).unwrap();
 
             assert_eq!(b_tree.search(&10), None);
         }
 
         #[test]
         fn it_should_search_in_tree_with_single_value() {
-            let mut b_tree: BTree<i32> = BTree::new(2, 3);
+            let mut b_tree: BTree<i32> = BTree::new(2, 3).unwrap();
 
             b_tree.insert(&10);
             assert_eq!(b_tree.search(&10), Some(10));
@@ -400,7 +377,7 @@ mod tests {
 
         #[test]
         fn test_search_multiple_values() {
-            let mut b_tree: BTree<i32> = BTree::new(2, 3);
+            let mut b_tree: BTree<i32> = BTree::new(2, 3).unwrap();
 
             b_tree.insert(&1);
             b_tree.insert(&2);
@@ -419,7 +396,7 @@ mod tests {
 
         #[test]
         fn it_should_store_all_values_correctly_for_1_leaf_node_degree_2() {
-            let mut b_tree: BTree<i32> = BTree::new(2, 3);
+            let mut b_tree: BTree<i32> = BTree::new(2, 3).unwrap();
 
             b_tree.insert(&10);
             b_tree.insert(&20);
@@ -434,7 +411,7 @@ mod tests {
 
         #[test]
         fn it_should_store_all_values_correctly_for_leaf_degree_2_common_degree_3() {
-            let mut b_tree: BTree<i32> = BTree::new(2, 3);
+            let mut b_tree: BTree<i32> = BTree::new(2, 3).unwrap();
 
             b_tree.insert(&10);
             b_tree.insert(&20);
@@ -483,7 +460,7 @@ mod tests {
 
         #[test]
         fn it_should_correctly_store_all_values_after_left_move() {
-            let mut b_tree: BTree<i32> = BTree::new(2, 2);
+            let mut b_tree: BTree<i32> = BTree::new(2, 2).unwrap();
 
             b_tree.insert(&6);
             b_tree.insert(&8);
@@ -537,8 +514,6 @@ mod tests {
                         }
                         _ => unreachable!("unreachable"),
                     };
-
-
                 }
                 _ => unreachable!("Root should be a common node"),
             };
