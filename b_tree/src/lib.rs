@@ -90,9 +90,8 @@ impl<K: Ord + Copy, V: Clone> BTree<K, V> {
         self.find_value(&self.root, key)
     }
 
-    pub fn show_settings(&self) {
-        println!("Common degree: {:}", self.common_degree);
-        println!("Leaf degree: {:}", self.leaf_degree);
+    pub fn get_settings(&self) -> (usize, usize) {
+        (self.common_degree, self.leaf_degree)
     }
 }
 
@@ -106,9 +105,10 @@ mod tests {
         #[test]
         fn it_should_create_new_tree() {
             let b_tree: BTree<i32, i32> = BTree::new(2, 3).unwrap();
+            let (common_degree, leaf_degree) = b_tree.get_settings();
 
-            assert_eq!(b_tree.leaf_degree, 2);
-            assert_eq!(b_tree.common_degree, 3);
+            assert_eq!(leaf_degree, 2);
+            assert_eq!(common_degree, 3);
         }
     }
 
