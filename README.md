@@ -17,12 +17,6 @@ To build the project, simply run:
 cargo build
 ```
 
-To run the tests:
-
-```bash
-cargo test
-```
-
 ## Links
 1. [SQLLIte from scratch](https://cstack.github.io/db_tutorial/)
 2. [SQLLite](https://github.com/sqlite/sqlite)
