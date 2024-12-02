@@ -1,12 +1,15 @@
 mod common_node;
+mod errors;
 mod leaf_node;
 mod types;
 
 use common_node::CommonNode;
 use leaf_node::LeafNode;
-use std::io;
 use types::{InsertType, TreeNode};
 
+pub use errors::BTreeCreateError;
+
+#[derive(Debug)]
 pub struct BTree<K, V> {
     leaf_degree: usize,
     common_degree: usize,
@@ -14,19 +17,13 @@ pub struct BTree<K, V> {
 }
 
 impl<K: Ord + Copy, V: Clone> BTree<K, V> {
-    pub fn new(leaf_degree: usize, common_degree: usize) -> io::Result<Self> {
+    pub fn new(leaf_degree: usize, common_degree: usize) -> Result<Self, BTreeCreateError> {
         if leaf_degree == 0 {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "The leaf node degree could not be equal to 0",
-            ));
+            return Err(BTreeCreateError::ZeroLeafNodeDegree);
         }
 
         if common_degree <= 1 {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "The common node degree should be greater than 1",
-            ));
+            return Err(BTreeCreateError::WrongCommonNodeDegree);
         }
 
         Ok(BTree {
@@ -109,6 +106,24 @@ mod tests {
 
             assert_eq!(leaf_degree, 2);
             assert_eq!(common_degree, 3);
+        }
+
+        #[test]
+        fn it_should_return_zero_leaf_node_degree_error() {
+            let err = BTree::<i32, i32>::new(0, 3).unwrap_err();
+            assert_eq!(
+                err.to_string(),
+                "The leaf node degree could not be equal to 0",
+            );
+        }
+
+        #[test]
+        fn it_should_return_wrong_common_node_degree_error() {
+            let err = BTree::<i32, i32>::new(2, 1).unwrap_err();
+            assert_eq!(
+                err.to_string(),
+                "The common node degree should be greater than 1",
+            );
         }
     }
 
