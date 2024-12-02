@@ -4,6 +4,7 @@ use std::rc::Rc;
 
 use crate::{InsertType, TreeNode};
 
+#[derive(Debug)]
 pub struct CommonNode<K, V> {
     degree: usize,
     keys: Vec<K>,

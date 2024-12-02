@@ -3,6 +3,7 @@ use crate::leaf_node::LeafNode;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+#[derive(Debug)]
 pub enum TreeNode<K, V> {
     Common(CommonNode<K, V>),
     Leaf(LeafNode<K, V>),
