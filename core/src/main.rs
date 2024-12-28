@@ -1,5 +1,7 @@
 mod database;
 mod db_config;
+mod db_loader;
+mod table;
 
 use clap::Parser;
 use database::Database;

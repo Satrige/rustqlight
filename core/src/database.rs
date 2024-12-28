@@ -1,8 +1,12 @@
+use std::collections::HashMap;
 use thiserror::Error;
 
-use crate::db_config::DbConfig;
+use crate::{db_config::DbConfig, db_loader::DbLoader, table::Table};
 
-pub struct Database {}
+pub struct Database {
+    loader: Box<dyn DbLoader>,
+    tables: HashMap<String, Table>,
+}
 
 #[derive(Error, Debug)]
 pub enum DatabaseCreationError {
