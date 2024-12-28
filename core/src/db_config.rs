@@ -31,7 +31,7 @@ impl DbConfig {
                 Ok(db_config) => Ok(db_config),
                 Err(err) => {
                     error!(
-                        "Can't deserialize the conf file: {}.\nDescription: {}",
+                        "Can't deserialize the conf file: {}.\nDescription: {}.",
                         file_name, err,
                     );
                     Err(DbConfigError::WrongConfigFormat(file_name.to_string()))
@@ -39,7 +39,7 @@ impl DbConfig {
             },
             Err(err) => {
                 error!(
-                    "Can't read the conf file: {}.\nDescription: {}",
+                    "Can't read the conf file: {}.\nDescription: {}.",
                     file_name, err,
                 );
                 Err(DbConfigError::WrongConfigPath(file_name.to_string()))
