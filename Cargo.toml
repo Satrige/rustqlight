@@ -2,4 +2,5 @@
 members = [
     "database",
     "b_tree",
+    "core",
 ]
