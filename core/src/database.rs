@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+use crate::db_config::DbConfig;
+
 pub struct Database {}
 
 #[derive(Error, Debug)]
@@ -9,7 +11,7 @@ pub enum DatabaseCreationError {
 }
 
 impl Database {
-    pub fn new() -> Result<Self, DatabaseCreationError> {
-
+    pub fn new(config: &DbConfig) -> Result<Self, DatabaseCreationError> {
+        Ok(Database {})
     }
 }
