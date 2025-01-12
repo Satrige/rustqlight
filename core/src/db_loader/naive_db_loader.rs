@@ -1,12 +1,18 @@
-use super::{DbLoader, DbLoaderError};
+use super::{DbLoader, DbLoaderDumpError, DbLoaderLoadError};
 use log::error;
 use std::fs;
 
 /// The loader which loads the whole db from a file
-struct NaiveDbLoader {}
+pub struct NaiveDbLoader {}
+
+impl NaiveDbLoader {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 impl DbLoader for NaiveDbLoader {
-    fn load(file_name: &str) -> Result<(), DbLoaderError> {
+    fn load(&self, file_name: &str) -> Result<(), DbLoaderLoadError> {
         match fs::read_to_string(file_name) {
             Ok(file_contents) => Ok(()),
             Err(err) => {
@@ -14,8 +20,12 @@ impl DbLoader for NaiveDbLoader {
                     "Can't read the db file: {}.\nDescription: {}.",
                     file_name, err,
                 );
-                Err(DbLoaderError::WrongDbPath(file_name.to_string()))
+                Err(DbLoaderLoadError::WrongDbPath(file_name.to_string()))
             }
         }
+    }
+
+    fn dump(&self) -> Result<(), DbLoaderDumpError> {
+        Ok(())
     }
 }

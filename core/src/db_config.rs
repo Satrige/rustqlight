@@ -6,7 +6,8 @@ use thiserror::Error;
 
 #[derive(Debug, Deserialize)]
 pub struct DbConfig {
-    db_path: String,
+    pub db_path: String,
+    pub loader: String,
 }
 
 #[derive(Error, Debug)]
@@ -21,7 +22,8 @@ pub enum DbConfigError {
 impl DbConfig {
     pub fn new() -> Self {
         DbConfig {
-            db_path: "./db_config.yaml".to_string(),
+            db_path: "./db".to_string(),
+            loader: "naive".to_string(),
         }
     }
 

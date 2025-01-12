@@ -24,7 +24,5 @@ async fn main() {
         None => DbConfig::new(),
     };
 
-    println!("Config: {:?}", config);
-
     let database = Database::new(&config).unwrap();
 }
