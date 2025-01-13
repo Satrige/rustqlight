@@ -16,7 +16,7 @@ pub enum DbLoaderDumpError {
 }
 
 pub trait DbLoader {
-    fn load(&self, file_name: &str) -> Result<(), DbLoaderLoadError>;
+    fn load_structure(&self, dir_name: &str) -> Result<(), DbLoaderLoadError>;
 
     fn dump(&self) -> Result<(), DbLoaderDumpError>;
 }
