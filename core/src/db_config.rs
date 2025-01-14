@@ -1,7 +1,8 @@
 use log::error;
 use serde::Deserialize;
 use serde_yaml;
-use std::fs;
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 use thiserror::Error;
 
 #[derive(Debug, Deserialize)]
@@ -12,8 +13,14 @@ pub struct DbConfig {
 
 #[derive(Error, Debug)]
 pub enum DbConfigError {
+    #[error("Can't canonicalize the config path: {0}")]
+    CanonError(#[from] io::Error),
+
+    #[error("The config file doesn't exist: {0}")]
+    NotExistConfigFile(PathBuf),
+
     #[error("Wrong config path: {0}")]
-    WrongConfigPath(String),
+    WrongConfigPath(PathBuf),
 
     #[error("Wrong format of the config: {0}")]
     WrongConfigFormat(String),
@@ -27,7 +34,15 @@ impl DbConfig {
         }
     }
 
-    pub fn parse_config_file(file_name: &str) -> Result<DbConfig, DbConfigError> {
+    pub fn parse_config_file<P: AsRef<Path>>(
+        config_file_path: P,
+    ) -> Result<DbConfig, DbConfigError> {
+        let canon_file_path = fs::canonicalize(&config_file_path)?;
+
+        if !canon_file_path.exists() {
+            return Err(DbConfigError::NotExistConfigFile(canon_file_path));
+        }
+
         match fs::read_to_string(file_name) {
             Ok(file_contents) => match serde_yaml::from_str(&file_contents) {
                 Ok(db_config) => Ok(db_config),
