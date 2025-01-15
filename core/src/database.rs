@@ -3,7 +3,7 @@ use thiserror::Error;
 
 use crate::{
     db_config::DbConfig,
-    db_loader::{DbLoader, NaiveDbLoader},
+    db_loader::{DbLoader, DbLoaderLoadError, NaiveDbLoader},
     table::Table,
 };
 
@@ -30,8 +30,16 @@ impl Database {
         }
 
         Ok(Database {
-            loader: Box::new(NaiveDbLoader::new()),
+            loader: Box::new(NaiveDbLoader::new(config.db_path.clone())),
             tables: HashMap::new(),
         })
+    }
+
+    pub fn load(&self) -> Result<(), DbLoaderLoadError> {
+        let db_struct = self.loader.load_structure()?;
+
+        println!("Db parsed struct: {:?}", &db_struct);
+
+        Ok(())
     }
 }

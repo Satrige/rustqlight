@@ -1,4 +1,6 @@
 mod naive_db_loader;
+use serde::Deserialize;
+use serde_yaml;
 use thiserror::Error;
 
 pub use naive_db_loader::NaiveDbLoader;
@@ -7,6 +9,9 @@ pub use naive_db_loader::NaiveDbLoader;
 pub enum DbLoaderLoadError {
     #[error("Wrong config path: {0}")]
     WrongDbPath(String),
+
+    #[error("Wrong format of the database data")]
+    MalformedData,
 }
 
 #[derive(Error, Debug)]
@@ -15,8 +20,26 @@ pub enum DbLoaderDumpError {
     WrongDbPath(String),
 }
 
+#[derive(Debug, Deserialize)]
+struct RowStruct {
+    row_name: String,
+    row_type: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct TableStruct {
+    table_name: String,
+    table_structure: Vec<RowStruct>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DbStruct {
+    db_name: String,
+    tables: Vec<TableStruct>,
+}
+
 pub trait DbLoader {
-    fn load_structure(&self, dir_name: &str) -> Result<(), DbLoaderLoadError>;
+    fn load_structure(&self) -> Result<DbStruct, DbLoaderLoadError>;
 
     fn dump(&self) -> Result<(), DbLoaderDumpError>;
 }

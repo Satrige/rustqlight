@@ -23,7 +23,7 @@ pub enum DbConfigError {
     WrongConfigPath(PathBuf),
 
     #[error("Wrong format of the config: {0}")]
-    WrongConfigFormat(String),
+    WrongConfigFormat(PathBuf),
 }
 
 impl DbConfig {
@@ -43,23 +43,25 @@ impl DbConfig {
             return Err(DbConfigError::NotExistConfigFile(canon_file_path));
         }
 
-        match fs::read_to_string(file_name) {
+        match fs::read_to_string(&canon_file_path) {
             Ok(file_contents) => match serde_yaml::from_str(&file_contents) {
                 Ok(db_config) => Ok(db_config),
                 Err(err) => {
                     error!(
                         "Can't deserialize the conf file: {}.\nDescription: {}.",
-                        file_name, err,
+                        canon_file_path.display(),
+                        err,
                     );
-                    Err(DbConfigError::WrongConfigFormat(file_name.to_string()))
+                    Err(DbConfigError::WrongConfigFormat(canon_file_path))
                 }
             },
             Err(err) => {
                 error!(
                     "Can't read the conf file: {}.\nDescription: {}.",
-                    file_name, err,
+                    canon_file_path.display(),
+                    err,
                 );
-                Err(DbConfigError::WrongConfigPath(file_name.to_string()))
+                Err(DbConfigError::WrongConfigPath(canon_file_path))
             }
         }
     }

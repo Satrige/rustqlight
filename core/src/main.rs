@@ -25,4 +25,6 @@ async fn main() {
     };
 
     let database = Database::new(&config).unwrap();
+
+    database.load();
 }
