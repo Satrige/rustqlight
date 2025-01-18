@@ -1,6 +1,5 @@
 mod naive_db_loader;
 use serde::Deserialize;
-use serde_yaml;
 use thiserror::Error;
 
 pub use naive_db_loader::NaiveDbLoader;
