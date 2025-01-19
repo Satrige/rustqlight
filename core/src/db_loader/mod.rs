@@ -6,6 +6,8 @@ use thiserror::Error;
 
 pub use naive_db_loader::NaiveDbLoader;
 
+use crate::table::Table;
+
 #[derive(Error, Debug)]
 pub enum DbLoaderLoadError {
     #[error("Wrong config path: {0}")]
@@ -51,10 +53,19 @@ pub struct DbStruct {
     tables: Vec<TableStruct>,
 }
 
+impl DbStruct {
+    pub fn get_table_names(&self) -> Vec<&str> {
+        self.tables
+            .iter()
+            .map(|table| table.table_name.as_str())
+            .collect()
+    }
+}
+
 pub trait DbLoader {
     fn load_structure(&self) -> Result<DbStruct, DbLoaderLoadError>;
 
-    fn load_table(&self, table_name: &str) -> Result<(), DbLoaderLoadTableError>;
+    async fn load_table(&self, table_name: &str) -> Result<Table, DbLoaderLoadTableError>;
 
     fn dump(&self) -> Result<(), DbLoaderDumpError>;
 }

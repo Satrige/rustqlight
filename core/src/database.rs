@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use thiserror::Error;
+use tokio::sync::Mutex;
 
 use crate::{
     db_config::DbConfig,
@@ -35,10 +36,27 @@ impl Database {
         })
     }
 
-    pub fn load(&self) -> Result<(), DbLoaderLoadError> {
+    pub async fn load(&self) -> Result<(), DbLoaderLoadError> {
         let db_struct = self.loader.load_structure()?;
-
         println!("Db parsed struct: {:?}", &db_struct);
+
+        let table_names = db_struct.get_table_names();
+
+        let results = Mutex::new(HashMap::new());
+
+        let table_read_tasks = table_names
+            .iter()
+            .map(|name| {
+                let name = name.to_string();
+                let results = &results;
+
+                async move {
+                    let table = self.loader.load_table(&name).await;
+                    let mut map = results.lock().await;
+                    map.insert(name, table);
+                };
+            })
+            .collect();
 
         Ok(())
     }

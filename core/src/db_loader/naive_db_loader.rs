@@ -1,3 +1,5 @@
+use crate::table::Table;
+
 use super::{DbLoader, DbLoaderDumpError, DbLoaderLoadError, DbLoaderLoadTableError, DbStruct};
 use log::error;
 use std::fs;
@@ -49,7 +51,7 @@ impl DbLoader for NaiveDbLoader {
         }
     }
 
-    fn load_table(&self, table_name: &str) -> Result<(), DbLoaderLoadTableError> {
+    async fn load_table(&self, table_name: &str) -> Result<Table, DbLoaderLoadTableError> {
         let table_data_path = Path::new(&self.db_path).join(table_name);
 
         let canon_table_data_path = fs::canonicalize(&table_data_path)?;
@@ -61,7 +63,8 @@ impl DbLoader for NaiveDbLoader {
         }
 
         match fs::read_to_string(&table_data_path) {
-            Ok(_table_contents) => Ok(()),
+            // TODO Write the logic here
+            Ok(_table_contents) => Ok(Table::new(table_name)),
             Err(err) => {
                 error!(
                     "Can't read the table file: {:?}.\nDescription: {}.",
