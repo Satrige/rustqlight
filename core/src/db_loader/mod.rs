@@ -1,4 +1,6 @@
 mod naive_db_loader;
+use std::{io, path::PathBuf};
+
 use serde::Deserialize;
 use thiserror::Error;
 
@@ -11,6 +13,18 @@ pub enum DbLoaderLoadError {
 
     #[error("Wrong format of the database data")]
     MalformedData,
+}
+
+#[derive(Error, Debug)]
+pub enum DbLoaderLoadTableError {
+    #[error("Wrong table name: {0}")]
+    WrongTableName(String),
+
+    #[error("Can't read table {0} from file: {1}")]
+    ReadTableError(String, PathBuf),
+
+    #[error("Can't canonicalize the table path: {0}")]
+    CanonError(#[from] io::Error),
 }
 
 #[derive(Error, Debug)]
@@ -39,6 +53,8 @@ pub struct DbStruct {
 
 pub trait DbLoader {
     fn load_structure(&self) -> Result<DbStruct, DbLoaderLoadError>;
+
+    fn load_table(&self, table_name: &str) -> Result<(), DbLoaderLoadTableError>;
 
     fn dump(&self) -> Result<(), DbLoaderDumpError>;
 }

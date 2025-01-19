@@ -1,4 +1,4 @@
-use super::{DbLoader, DbLoaderDumpError, DbLoaderLoadError, DbStruct};
+use super::{DbLoader, DbLoaderDumpError, DbLoaderLoadError, DbLoaderLoadTableError, DbStruct};
 use log::error;
 use std::fs;
 use std::path::Path;
@@ -44,6 +44,32 @@ impl DbLoader for NaiveDbLoader {
                 );
                 Err(DbLoaderLoadError::WrongDbPath(
                     db_struct_path.into_os_string().into_string().unwrap(),
+                ))
+            }
+        }
+    }
+
+    fn load_table(&self, table_name: &str) -> Result<(), DbLoaderLoadTableError> {
+        let table_data_path = Path::new(&self.db_path).join(table_name);
+
+        let canon_table_data_path = fs::canonicalize(&table_data_path)?;
+
+        if !canon_table_data_path.exists() {
+            return Err(DbLoaderLoadTableError::WrongTableName(
+                table_name.to_string(),
+            ));
+        }
+
+        match fs::read_to_string(&table_data_path) {
+            Ok(_table_contents) => Ok(()),
+            Err(err) => {
+                error!(
+                    "Can't read the table file: {:?}.\nDescription: {}.",
+                    table_data_path, err,
+                );
+                Err(DbLoaderLoadTableError::ReadTableError(
+                    table_name.to_string(),
+                    table_data_path,
                 ))
             }
         }
