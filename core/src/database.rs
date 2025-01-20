@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 use thiserror::Error;
-use tokio::sync::Mutex;
+use tokio::{sync::Mutex, task};
 
 use crate::{
     db_config::DbConfig,
@@ -9,7 +9,7 @@ use crate::{
 };
 
 pub struct Database {
-    loader: Box<dyn DbLoader>,
+    loader: Arc<dyn DbLoader>,
     tables: HashMap<String, Table>,
 }
 
@@ -31,7 +31,7 @@ impl Database {
         }
 
         Ok(Database {
-            loader: Box::new(NaiveDbLoader::new(config.db_path.clone())),
+            loader: Arc::new(NaiveDbLoader::new(config.db_path.clone())),
             tables: HashMap::new(),
         })
     }
@@ -44,19 +44,31 @@ impl Database {
 
         let results = Mutex::new(HashMap::new());
 
-        let table_read_tasks = table_names
-            .iter()
-            .map(|name| {
-                let name = name.to_string();
-                let results = &results;
+        let mut handlers = Vec::new();
 
-                async move {
-                    let table = self.loader.load_table(&name).await;
-                    let mut map = results.lock().await;
-                    map.insert(name, table);
-                };
-            })
-            .collect();
+        for name in table_names {
+            let name = name.to_string();
+            let results = &results;
+
+            let clonned_loader = Arc::clone(&self.loader);
+
+            let handle = task::spawn(async move {
+                let table = clonned_loader.load_table(&name).await;
+                let mut map = results.lock().await;
+                map.insert(name, table);
+            });
+
+            handlers.push(handle);
+        }
+
+        for handle in handlers {
+            handle.await.unwrap();
+        }
+
+        let results = results.lock().await;
+        for (key, table) in results.iter() {
+            println!("Loaded table: {} -> {:?}", key, table.get_name());
+        }
 
         Ok(())
     }

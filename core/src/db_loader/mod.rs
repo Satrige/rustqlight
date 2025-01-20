@@ -64,7 +64,7 @@ impl DbStruct {
 }
 
 #[async_trait]
-pub trait DbLoader {
+pub trait DbLoader: Send + Sync {
     fn load_structure(&self) -> Result<DbStruct, DbLoaderLoadError>;
 
     async fn load_table(&self, table_name: &str) -> Result<Table, DbLoaderLoadTableError>;
