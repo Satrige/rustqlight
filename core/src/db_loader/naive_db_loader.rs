@@ -1,6 +1,7 @@
 use crate::table::Table;
 
 use super::{DbLoader, DbLoaderDumpError, DbLoaderLoadError, DbLoaderLoadTableError, DbStruct};
+use async_trait::async_trait;
 use log::error;
 use std::fs;
 use std::path::Path;
@@ -32,6 +33,7 @@ impl NaiveDbLoader {
     }
 }
 
+#[async_trait]
 impl DbLoader for NaiveDbLoader {
     fn load_structure(&self) -> Result<DbStruct, DbLoaderLoadError> {
         let db_struct_path =

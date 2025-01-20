@@ -1,6 +1,7 @@
 mod naive_db_loader;
 use std::{io, path::PathBuf};
 
+use async_trait::async_trait;
 use serde::Deserialize;
 use thiserror::Error;
 
@@ -62,6 +63,7 @@ impl DbStruct {
     }
 }
 
+#[async_trait]
 pub trait DbLoader {
     fn load_structure(&self) -> Result<DbStruct, DbLoaderLoadError>;
 
