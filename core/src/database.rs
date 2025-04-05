@@ -42,13 +42,13 @@ impl Database {
 
         let table_names = db_struct.get_table_names();
 
-        let results = Mutex::new(HashMap::new());
+        let results = Arc::new(Mutex::new(HashMap::new()));
 
         let mut handlers = Vec::new();
 
         for name in table_names {
             let name = name.to_string();
-            let results = &results;
+            let results = results.clone();
 
             let clonned_loader = Arc::clone(&self.loader);
 
@@ -66,8 +66,10 @@ impl Database {
         }
 
         let results = results.lock().await;
-        for (key, table) in results.iter() {
-            println!("Loaded table: {} -> {:?}", key, table.get_name());
+        for (key, tableResult) in results.iter() {
+            if let Ok(table) = tableResult {
+                println!("Loaded table: {} -> {:?}", key, table.get_name());
+            }
         }
 
         Ok(())
