@@ -1,6 +1,7 @@
 mod database;
 mod db_config;
 mod db_loader;
+mod row;
 mod table;
 
 use clap::Parser;
