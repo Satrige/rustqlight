@@ -1,15 +1,16 @@
-use crate::row::Row;
+use crate::column_type::ColumnType;
+use std::iter::Map;
 
 pub struct Table {
     name: String,
-    rows: Vec<Row>,
+    schema: Map<String, ColumnType>,
 }
 
 impl Table {
-    pub fn new(table_name: &str) -> Self {
+    pub fn new(table_name: &str, schema: Map<String, ColumnType>) -> Self {
         Self {
             name: table_name.to_string(),
-            rows: Vec::new(),
+            schema,
         }
     }
 

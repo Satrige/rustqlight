@@ -66,7 +66,10 @@ impl DbLoader for NaiveDbLoader {
 
         match fs::read_to_string(&table_data_path) {
             // TODO Write the logic here
-            Ok(_table_contents) => Ok(Table::new(table_name)),
+            Ok(_table_contents) => {
+                let table = Table::new(table_name);
+                Ok(table)
+            }
             Err(err) => {
                 error!(
                     "Can't read the table file: {:?}.\nDescription: {}.",
